@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Breaking News</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+  <div class="bg-light p-5 rounded-lg m-3">
+    <h1 class="display-4">Breaking News</h1>
+  </div>
+  <table class="table">
+    <tr th:each="item :${news}">
+      <td>
+        <img width="100px" th:src="${item.urlToImage}"/>
+      </td>
+      <td>
+        <a th:href="${item.url}">
+          <h3 th:text="${item.title}"/>
+        </a>
+        <p th:text="${item.description}"/>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>
+</html>
