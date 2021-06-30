@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <h1>Register</h1>
+    <form method="POST"
+          th:action="@{/user/register}"
+          th:object="${newsUser}">
+        <div th:replace="fragments/input :: input('text','Vorname', 'firstname')"/>
+        <div th:replace="fragments/input :: input('text','Nachname', 'lastname')"/>
+        <div th:replace="fragments/input :: input('date','Geburtstag', 'birthday')"/>
+        <div th:replace="fragments/input :: input('text','Benutzername', 'username')"/>
+        <div th:replace="fragments/input :: input('password','Passwort', 'password')"/>
+        <br/>
+        <div class="form-row">
+            <button class="btn btn-primary" type="submit">Register</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
