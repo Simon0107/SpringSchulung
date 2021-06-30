@@ -16,6 +16,7 @@
 	<properties>
 		<java.version>11</java.version>
 		<wiremock.version>2.28.0</wiremock.version>
+		<playwright.version>1.12.1</playwright.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -60,6 +61,25 @@
 			<version>${wiremock.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.tngtech.archunit</groupId>
+			<artifactId>archunit-junit5-api</artifactId>
+			<version>0.18.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.tngtech.archunit</groupId>
+			<artifactId>archunit-junit5-engine</artifactId>
+			<version>0.18.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.playwright</groupId>
+			<artifactId>playwright</artifactId>
+			<version>${playwright.version}</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -15,8 +15,8 @@ import java.time.LocalDate;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserProfileController.class)
 class UserProfileControllerTest {
@@ -38,5 +38,14 @@ class UserProfileControllerTest {
                 .andExpect(content().string(
                         containsString("Hello " + testuser.getFirstname())));
         verify(newsUserRepository).findByUsername(testuser.getUsername());
+    }
+
+    @Test
+    void testNotFound() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/user/profile/{username}", "unknown"))
+                .andExpect(view().name("usernotfound"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(
+                        containsString("We can not find this user.")));
     }
 }
