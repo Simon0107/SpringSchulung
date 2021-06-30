@@ -3,6 +3,7 @@ package de.sme.service;
 import de.sme.container.NewsItemContainer;
 import de.sme.model.NewsItem;
 import de.sme.model.NewsServiceProperties;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,6 +28,7 @@ public class NewsServiceImpl implements NewsService {
             "page=0";
 
     @Override
+    @Cacheable(cacheNames = "newscache")
     public List<NewsItem> findNews(int count) {
         var params = Map.of(
                 "count", String.valueOf(count),

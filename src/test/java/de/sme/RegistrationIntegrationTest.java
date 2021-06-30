@@ -6,16 +6,17 @@ import com.microsoft.playwright.Playwright;
 import de.sme.model.NewsUser;
 import de.sme.repo.NewsUserRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.management.Query;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.timeout;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment =
@@ -25,6 +26,8 @@ class RegistrationIntegrationTest {
     int port;
     @SpyBean
     NewsUserRepository newsUserRepository;
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @Test
     void testRegistration() {
@@ -47,9 +50,15 @@ class RegistrationIntegrationTest {
                 page.type("#birthday", checkUser.getBirthday()
                         .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
                 page.click("button");
-                verify(newsUserRepository, timeout(500).times(1)).save(checkUser);
-                assertEquals("http://localhost:" + port +
-                        "/user/profile/"+checkUser.getUsername(),page.url());
+
+                var argumentCaptor =
+                        ArgumentCaptor.forClass(NewsUser.class);
+                verify(newsUserRepository).save(argumentCaptor.capture());
+                var savedUser = argumentCaptor.getValue();
+                assertThat(checkUser).usingRecursiveComparison()
+                        .ignoringFields("password").isEqualTo(savedUser);
+                assertThat(passwordEncoder.matches(
+                        checkUser.getPassword(), savedUser.getPassword())).isTrue();
             }
         }
     }

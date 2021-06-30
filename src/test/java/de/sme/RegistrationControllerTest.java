@@ -8,21 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 
@@ -33,6 +32,9 @@ class RegistrationControllerTest {
     NewsUserRepository newsUserRepository;
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     @Test
     void testShowRegistrationForm() throws Exception {
         mockMvc
@@ -46,8 +48,9 @@ class RegistrationControllerTest {
     void testProcessRegistrationForm() throws Exception {
         var checkUser = new NewsUser("user", "pass",
                 "first", "last", LocalDate.of(1970, 1, 1));
+
         mockMvc
-                .perform(MockMvcRequestBuilders.post("/user/register")
+                .perform(MockMvcRequestBuilders.post("/user/register").with(csrf())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("firstname", checkUser.getFirstname())
                         .param("lastname", checkUser.getLastname())
@@ -56,12 +59,19 @@ class RegistrationControllerTest {
                         .param("username", checkUser.getUsername())
                         .param("password", checkUser.getPassword()))
                 .andExpect(redirectedUrl("/user/profile/"+checkUser.getUsername()));
-        verify(newsUserRepository).save(checkUser);
+        var argumentCaptor =
+                forClass(NewsUser.class);
+        verify(newsUserRepository).save(argumentCaptor.capture());
+        var savedUser = argumentCaptor.getValue();
+        assertThat(checkUser).usingRecursiveComparison()
+                .ignoringFields("password").isEqualTo(savedUser);
+        assertThat(passwordEncoder.matches(
+                checkUser.getPassword(), savedUser.getPassword())).isTrue();
     }
     @Test
     void testInvalidRegistrationFormFails() throws Exception {
         mockMvc
-                .perform(MockMvcRequestBuilders.post("/user/register")
+                .perform(MockMvcRequestBuilders.post("/user/register").with(csrf())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("firstname", "first")
                         .param("lastname", "last")
@@ -77,7 +87,7 @@ class RegistrationControllerTest {
     void testRegistrationFormFailsWhenUserExists() throws Exception {
         when(newsUserRepository.findByUsername("user")).thenReturn(new NewsUser());
         mockMvc
-                .perform(MockMvcRequestBuilders.post("/user/register")
+                .perform(MockMvcRequestBuilders.post("/user/register").with(csrf())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("firstname", "first")
                         .param("lastname", "last")
