@@ -32,7 +32,7 @@ public class RegistrationController {
     }
 
     @PostMapping
-    public String processRegistration(@Valid NewsUser user,
+    public String processRegistration(@Valid de.sme.entity.NewsUser user,
                                       BindingResult bindingResult) {
         if (newsUserRepository.findByUsername(user.getUsername()) != null) {
             bindingResult.addError(new FieldError("newsUser",

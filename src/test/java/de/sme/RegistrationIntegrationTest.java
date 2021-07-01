@@ -6,12 +6,19 @@ import com.microsoft.playwright.Playwright;
 import de.sme.model.NewsUser;
 import de.sme.repo.NewsUserRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.AdditionalAnswers;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -19,9 +26,21 @@ import java.time.format.DateTimeFormatter;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.verify;
 
+
 @SpringBootTest(webEnvironment =
         SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("inmemory")
 class RegistrationIntegrationTest {
+    @TestConfiguration
+    static class MockRepositoryConfiguration {
+        @Primary
+        @Bean
+        NewsUserRepository newsUserRepositoryMock(NewsUserRepository real) {
+            return Mockito.mock(NewsUserRepository.class,
+                    MockReset.withSettings(MockReset.AFTER)
+                            .defaultAnswer(AdditionalAnswers.delegatesTo(real)));
+        }
+    }
     @LocalServerPort
     int port;
     @SpyBean
@@ -52,11 +71,11 @@ class RegistrationIntegrationTest {
                 page.click("button");
 
                 var argumentCaptor =
-                        ArgumentCaptor.forClass(NewsUser.class);
+                        ArgumentCaptor.forClass(de.sme.entity.NewsUser.class);
                 verify(newsUserRepository).save(argumentCaptor.capture());
                 var savedUser = argumentCaptor.getValue();
                 assertThat(checkUser).usingRecursiveComparison()
-                        .ignoringFields("password").isEqualTo(savedUser);
+                        .ignoringFields("password", "version").isEqualTo(savedUser);
                 assertThat(passwordEncoder.matches(
                         checkUser.getPassword(), savedUser.getPassword())).isTrue();
             }

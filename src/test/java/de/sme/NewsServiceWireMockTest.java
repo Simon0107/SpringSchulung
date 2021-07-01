@@ -7,7 +7,6 @@ import de.sme.controller.NewsController;
 import de.sme.model.NewsItem;
 import de.sme.model.NewsServiceProperties;
 import de.sme.service.NewsService;
-import de.sme.service.NewsServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @Import({
-        NewsServiceImpl.class,
+        NewsService.class,
         RestTemplate.class,
         JacksonAutoConfiguration.class
 })

@@ -1,6 +1,6 @@
 package de.sme;
 
-import de.sme.model.NewsUser;
+import de.sme.entity.NewsUser;
 import de.sme.repo.NewsUserRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
