@@ -15,9 +15,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .mvcMatchers("/news").authenticated()
                 .anyRequest().permitAll()
                 .and()
-                .csrf()
+                .formLogin()
                 .and()
-                .formLogin();
+                .csrf().ignoringAntMatchers("/api/**")
+                .and()
+                .logout();
     }
     @Bean
     public PasswordEncoder passwordEncoder() {
